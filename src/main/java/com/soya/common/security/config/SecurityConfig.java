@@ -3,6 +3,8 @@ package com.soya.common.security.config;
 
 import com.soya.common.security.common.FormWebAuthenticationDetails;
 import com.soya.common.security.common.FromAuthenticationDetailsSource;
+import com.soya.common.security.filter.AjaxLoginProcessingFilter;
+import com.soya.common.security.handler.CustomAccessDeniedHandler;
 import com.soya.common.security.handler.CustomAuthenticationSuccessHandler;
 import com.soya.common.security.provider.CustomAuthenticationProvider;
 import com.soya.common.security.service.CustomUserDetailsService;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -25,13 +28,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@RequiredArgsConstructor
-@Slf4j
 @EnableWebSecurity
+@Order(1)
 public class SecurityConfig {
 
     @Autowired
@@ -44,19 +48,10 @@ public class SecurityConfig {
     private AuthenticationFailureHandler authenticationFailureHandler;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    @Bean
-    public CustomAuthenticationProvider customAuthenticationProvider() {
-        return new CustomAuthenticationProvider();
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests((authorizeRequest) -> authorizeRequest
                         .requestMatchers("/api").permitAll()
                         .requestMatchers("/users").permitAll()
@@ -80,7 +75,11 @@ public class SecurityConfig {
                 ).logout(
                         (logout) -> logout
                                 .logoutUrl("/logout")
-                );
+                ).exceptionHandling(
+                        (exceptionHandling) -> exceptionHandling
+                                .accessDeniedHandler(accessDeniedHandler())
+                )
+        ;
 //                .rememberMe(    // 아이디 기억하기 버튼 기능
 //                        (rememberMe) -> rememberMe
 //                                .rememberMeParameter("remember") // 기본 파라미터명은 remember-me
@@ -90,6 +89,27 @@ public class SecurityConfig {
 //                );
         return http.build();
     }
+
+    // 비밀번호 암호화
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    // 아이디 및 비밀번호 등 검증
+    @Bean
+    public CustomAuthenticationProvider customAuthenticationProvider() {
+        return new CustomAuthenticationProvider(passwordEncoder());
+    }
+
+    // 권한 없는 사용자 핸들링
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        CustomAccessDeniedHandler accessDeniedHandler = new CustomAccessDeniedHandler();
+        accessDeniedHandler.setErrorPage("/denied");
+        return accessDeniedHandler;
+    }
+
 
     // 정적자원관리 js, css ...  보안 필터 해제하기
     @Bean
