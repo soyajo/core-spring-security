@@ -1,10 +1,14 @@
 package com.soya.common.security.config;
 
 
+import com.soya.common.security.common.FormWebAuthenticationDetails;
+import com.soya.common.security.common.FromAuthenticationDetailsSource;
+import com.soya.common.security.handler.CustomAuthenticationSuccessHandler;
 import com.soya.common.security.provider.CustomAuthenticationProvider;
 import com.soya.common.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +25,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @RequiredArgsConstructor
@@ -28,6 +34,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private FromAuthenticationDetailsSource fromAuthenticationDetailsSource;
+
+    @Autowired
+    private AuthenticationSuccessHandler authenticationSuccessHandler;
+
+    @Autowired
+    private AuthenticationFailureHandler authenticationFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -43,21 +57,25 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .authorizeHttpRequests((authorizeRequest) ->  authorizeRequest
-                                .requestMatchers("/api").permitAll()
-                                .requestMatchers("/users").permitAll()
-                                .requestMatchers("/user/login/**").permitAll()
-                                .requestMatchers("/").permitAll()
-                                .requestMatchers("/mypage").hasRole("USER")
-                                .requestMatchers("/messages").hasRole("MANAGER")
-                                .requestMatchers("/mypage").hasRole("ADMIN")
-                                .anyRequest().authenticated()
-                        )
+                .authorizeHttpRequests((authorizeRequest) -> authorizeRequest
+                        .requestMatchers("/api").permitAll()
+                        .requestMatchers("/users").permitAll()
+                        .requestMatchers("/user/login/**").permitAll()
+                        .requestMatchers("/login*").permitAll()
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/mypage").hasRole("USER")
+                        .requestMatchers("/messages").hasRole("MANAGER")
+                        .requestMatchers("/mypage").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
                 .formLogin(
                         (formLogin) -> formLogin
                                 .defaultSuccessUrl("/")
                                 .loginPage("/login")
                                 .loginProcessingUrl("/login_proc")
+                                .successHandler(authenticationSuccessHandler)
+                                .failureHandler(authenticationFailureHandler)
+                                .authenticationDetailsSource(fromAuthenticationDetailsSource)
                                 .permitAll()
                 ).logout(
                         (logout) -> logout

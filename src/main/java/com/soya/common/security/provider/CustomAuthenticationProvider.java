@@ -1,10 +1,12 @@
 package com.soya.common.security.provider;
 
+import com.soya.common.security.common.FormWebAuthenticationDetails;
 import com.soya.common.security.service.AccountContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -38,11 +40,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         }
 
         // 추가 검증할 수 있음.
+        // 추가 검증 컬럼 secret_key
+        FormWebAuthenticationDetails formWebAuthenticationDetails = (FormWebAuthenticationDetails) authentication.getDetails();
+        String secretKey = formWebAuthenticationDetails.getSecretKey();
 
+        if (secretKey == null || !"secret".equals(secretKey)) {
+            throw new InsufficientAuthenticationException("InsufficientAuthenticationException");
+        }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(accountContext.getAccount(), null, accountContext.getAuthorities());
-
-
 
         return authenticationToken;
     }
