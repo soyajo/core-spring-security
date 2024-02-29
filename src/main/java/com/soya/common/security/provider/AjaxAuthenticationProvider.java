@@ -12,7 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AjaxAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
@@ -33,7 +35,7 @@ public class AjaxAuthenticationProvider implements AuthenticationProvider {
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(password, accountContext.getAccount().getPassword())) {
-            throw new BadCredentialsException("BadCredentialsException");
+            throw new BadCredentialsException("Invalid password");
         }
 
         // 추가 검증할 수 있음.
