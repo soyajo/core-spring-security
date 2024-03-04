@@ -56,65 +56,63 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
     private void setupSecurityResources() {
 
-        Account adminAccount = new Account().builder()
-                .age("26")
-                .username("admin")
-                .password(passwordEncoder.encode("1234"))
-                .build();
 
-        userRepository.save(adminAccount);
+//        Account adminAccount = new Account().builder()
+//                .age("26")
+//                .username("admin")
+//                .password(passwordEncoder.encode("1234"))
+//                .build();
+//
+//        userRepository.save(adminAccount);
+//
+//        Role adminRole = new Role().builder()
+//                .account(adminAccount)
+//                .roleDesc("관리자")
+//                .roleName("ROLE_ADMIN")
+//                .build();
+//
+//        roleRepository.save(adminRole);
+//
+//        Role managerRole = new Role().builder()
+//                .account(adminAccount)
+//                .roleDesc("매니저권한")
+//                .roleName("ROLE_MANAGER")
+//                .build();
+//
+//        roleRepository.save(managerRole);
+//
+//        Role userRole = new Role().builder()
+//                .account(adminAccount)
+//                .roleDesc("사용자권한")
+//                .roleName("ROLE_USER")
+//                .build();
+//
+//        roleRepository.save(userRole);
+//
+//        Resources adminUrlResources = new Resources().builder()
+//                .role(adminRole)
+//                .orderNum(count.incrementAndGet())
+//                .resourceName("/admin/**")
+//                .resourceType("url")
+//                .build();
+//
+//        resourcesRepository.save(adminUrlResources);
+//
+//        Resources adminPointcutResources = new Resources().builder()
+//                .role(adminRole)
+//                .orderNum(count.incrementAndGet())
+//                .resourceName("execution(public * io.security.corespringsecurity.aopsecurity.*Service.pointcut*(..))")
+//                .resourceType("pointcut")
+//                .build();
+//
+//        resourcesRepository.save(adminPointcutResources);
+        createUserIfNotFound("admin", "admin@admin.com", "1243");
+        Role adminRole = createRoleIfNotFound("ROLE_ADMIN", "관리자");
+        Role managerRole = createRoleIfNotFound("ROLE_MANAGER", "매니저권한");
+        Role userRole = createRoleIfNotFound("ROLE_USER", "사용자권한");
+        createResourceIfNotFound("/admin/**", "", adminRole, "url");
+        createResourceIfNotFound("execution(public * io.security.corespringsecurity.aopsecurity.*Service.pointcut*(..))", "", adminRole, "pointcut");
 
-        Role adminRole = new Role().builder()
-                .account(adminAccount)
-                .roleDesc("관리자")
-                .roleName("ROLE_ADMIN")
-                .build();
-
-        roleRepository.save(adminRole);
-
-        Role managerRole = new Role().builder()
-                .account(adminAccount)
-                .roleDesc("매니저권한")
-                .roleName("ROLE_MANAGER")
-                .build();
-
-        roleRepository.save(managerRole);
-
-        Role userRole = new Role().builder()
-                .account(adminAccount)
-                .roleDesc("사용자권한")
-                .roleName("ROLE_USER")
-                .build();
-
-        roleRepository.save(userRole);
-
-        Resources adminUrlResources = new Resources().builder()
-                .role(adminRole)
-                .orderNum(count.incrementAndGet())
-                .resourceName("/admin/**")
-                .resourceType("url")
-                .build();
-
-        resourcesRepository.save(adminUrlResources);
-
-        Resources adminPointcutResources = new Resources().builder()
-                .role(adminRole)
-                .orderNum(count.incrementAndGet())
-                .resourceName("execution(public * io.security.corespringsecurity.aopsecurity.*Service.pointcut*(..))")
-                .resourceType("pointcut")
-                .build();
-
-        resourcesRepository.save(adminPointcutResources);
-
-
-//        Set<Role> roles = new HashSet<>();
-//        Role adminRole = createRoleIfNotFound("ROLE_ADMIN", "관리자");
-//        roles.add(adminRole);
-//        createResourceIfNotFound("/admin/**", "", adminRole, "url");
-//        createResourceIfNotFound("execution(public * io.security.corespringsecurity.aopsecurity.*Service.pointcut*(..))", "", adminRole, "pointcut");
-//        createUserIfNotFound("admin", "admin@admin.com", "pass", roles);
-//        Role managerRole = createRoleIfNotFound("ROLE_MANAGER", "매니저권한");
-//        Role userRole = createRoleIfNotFound("ROLE_USER", "사용자권한");
         createRoleHierarchyIfNotFound(managerRole, adminRole);
         createRoleHierarchyIfNotFound(userRole, managerRole);
     }
@@ -134,7 +132,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     }
 
     @Transactional
-    public Account createUserIfNotFound(final String userName, final String email, final String password, Set<Role> roleSet) {
+    public Account createUserIfNotFound(final String userName, final String email, final String password) {
 
         Account account = userRepository.findByUsername(userName);
 
@@ -143,7 +141,6 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .username(userName)
                     .email(email)
                     .password(passwordEncoder.encode(password))
-                    .userRoles(roleSet)
                     .build();
         }
         return userRepository.save(account);

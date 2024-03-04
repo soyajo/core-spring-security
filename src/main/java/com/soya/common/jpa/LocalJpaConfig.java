@@ -102,8 +102,9 @@ public class LocalJpaConfig {
         Properties properties = new Properties();
         // 기존 속성 설정
         properties.setProperty("hibernate.dialect", MariaDBDialect.class.getName());
-//        properties.setProperty("hibernate.hbm2ddl.auto", "create");
-        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+//        properties.setProperty("hibernate.hbm2ddl.auto", "none");
+        properties.setProperty("hibernate.hbm2ddl.auto", "create");
+//        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         properties.setProperty("hibernate.show_sql", "true");
         properties.setProperty("hibernate.format_sql", "true");
 //        properties.setProperty("hibernate.use_sql_comments", "true");
