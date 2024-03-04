@@ -41,7 +41,7 @@ public class LocalJpaConfig {
     @Value("${spring.profiles.active}")
     public String active;
 
-    public String url = "jdbc:mariadb://localhost:3306/local?allowMultiQueries=true";
+    public String url = "jdbc:mariadb://localhost:3306/local??allowPublicKeyRetrieval=true&useSSL=false";
 
     public String user="root";
 

@@ -21,7 +21,6 @@ public class Resources implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "resource_id")
     private Long id;
 
     @Column(name = "resource_name")
@@ -36,9 +35,8 @@ public class Resources implements Serializable {
     @Column(name = "resource_type")
     private String resourceType;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "role_resources", joinColumns = {
-            @JoinColumn(name = "resource_id") }, inverseJoinColumns = { @JoinColumn(name = "role_id") })
-    private Set<Role> roleSet = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
 }

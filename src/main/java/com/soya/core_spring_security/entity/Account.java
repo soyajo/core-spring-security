@@ -24,8 +24,6 @@ public class Account {
     private String email;
     private String age;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade={CascadeType.ALL})
-    @JoinTable(name = "account_roles", joinColumns = { @JoinColumn(name = "account_id") }, inverseJoinColumns = {
-            @JoinColumn(name = "role_id") })
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "account")
     private Set<Role> userRoles = new HashSet<>();
 }

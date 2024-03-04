@@ -22,7 +22,6 @@ public class Role implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
     private Long id;
 
     @Column(name = "role_name")
@@ -31,12 +30,12 @@ public class Role implements Serializable {
     @Column(name = "role_desc")
     private String roleDesc;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roleSet")
-    @OrderBy("orderNum desc")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "role", cascade = CascadeType.ALL)
     private Set<Resources> resourcesSet = new LinkedHashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "userRoles")
-    private Set<Account> accounts = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account account;
 
 }
 
