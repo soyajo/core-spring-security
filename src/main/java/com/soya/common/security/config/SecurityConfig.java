@@ -6,6 +6,7 @@ import com.soya.common.security.common.FromAuthenticationDetailsSource;
 import com.soya.common.security.filter.AjaxLoginProcessingFilter;
 import com.soya.common.security.handler.CustomAccessDeniedHandler;
 import com.soya.common.security.handler.CustomAuthenticationSuccessHandler;
+import com.soya.common.security.metadatasource.UrlFilterInvocationSecurityMetadataSource;
 import com.soya.common.security.provider.CustomAuthenticationProvider;
 import com.soya.common.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -29,6 +31,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -46,6 +49,7 @@ public class SecurityConfig {
 
     @Autowired
     private AuthenticationFailureHandler authenticationFailureHandler;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -116,4 +120,12 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
+
+//    @Bean
+//    public FilterSecurityInterceptor customFilterSecurityInterceptor() {
+//        FilterSecurityInterceptor filterSecurityInterceptor = new FilterSecurityInterceptor();
+//        filterSecurityInterceptor.setSecurityMetadataSource(urlFilterInvocationSecurityMetadataSource());
+//        filterSecurityInterceptor.setAccessDecisionManager(affirmativeBased());
+//        filterSecurityInterceptor.setAuthenticationManager(authenticationManagerBean());
+//    }
 }
